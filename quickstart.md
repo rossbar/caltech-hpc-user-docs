@@ -21,7 +21,7 @@ Details are provided in the [official documentation][hpc-login], with one
 caveat: you must log in to *specific* login nodes in order to access the H100's,
 either **login3** or **login4**:
 
-```{code-block} bash
+```
 $ ssh <your-username>@login3.hpc.caltech.edu
 ```
 
@@ -30,7 +30,7 @@ Follow the instructions to complete the login with two-factor authentication.
 After successful login, you will be on the *login node* inside the home directory
 for your account:
 
-```{code-block} bash
+```
 [<your-username>@login3 ~]$ pwd
 /home/<your-username>
 ```
@@ -38,12 +38,13 @@ for your account:
 ## Testing GPU access
 
 The login node is not intended for computationally-intensive tasks, thus you will
-not have direct access to GPU resources from the login node.
+not have direct access to GPU resources there.
+To test GPU access, you'll need to use one of the *compute nodes*.
 
 One way to do so is to log onto one of the compute nodes interactively using
 `srun`:
 
-```{code-block} bash
+```
 $ srun --pty -t 00:00:30 --partition=gpu --gres=gpu:h100:1 -N 1 -n 1 /bin/bash -l
 ```
 
@@ -51,17 +52,16 @@ As soon as your job is allocated, you should notice a change in the hostname
 (the thing after the `@` in your bash prompt) indicating that you are now on
 a compute node, e.g.
 
-```{code-block} bash
-$ srun --pty -t 00:00:30 --partition=gpu --gres=gpu:h100:1 -N 1 -n 1 /bin/bash -l
+```
 [<your-username>@hpc-33-13 ~]$
 ```
 
 The compute node will have access to the gpu resources requested via the `--gres`
 flag --- a single H100 card in this example.
-From the compute node you can run familiar commands to query the state of the
-GPU:
+You can run familiar commands to query the state of the GPU from the terminal
+session on the compute node:
 
-```{code-block} bash
+```
 [<your-username>@hpc-33-13 ~]$ nvidia-smi
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.86.10              Driver Version: 535.86.10    CUDA Version: 12.2     |
@@ -105,9 +105,9 @@ training job with slurm.
 ### Downloading the example
 
 We'll use the `mnist` example from a fork of the [`pytorch/examples`][gh-pt_examples]
-for our example workflow.
+for this demo.
 
-The reason we're using a forked version is the example is better illustrate
+The reason we're using a forked version is to better illustrate
 best-practices when working on shared HPC systems: ensuring that data and other
 components that require a lot of storage (e.g. saved models) are kept separate
 from source code.
@@ -146,7 +146,7 @@ Then create the environment for this specific experiment. We'll call it
 $ python3 -m venv ~/venvs/mnist-example
 ```
 
-Now enter the environment you've just created.
+Enter the environment you've just created.
 It should be empty, give-or-take libraries for packaging such as `pip`,
 `setuptools` and/or `wheel`:
 
@@ -161,13 +161,16 @@ setuptools 53.0.0
 
 ### Installing dependencies
 
+```{caution}
 This step requires careful attention when using libraries that interface with
 GPUs, such as `pytorch`.
+```
+
 In order to fully support the hardware, GPUs *must* be discoverable at
 installation time, i.e. when you run `pip install`.
 
 **This means that you must install dependencies with device support (like `pytorch`)
-on the compute nodes allocated GPU(s).**
+on the compute nodes with allocated GPU(s).**
 
 There are multiple ways you can do so: one option is to include the dependency
 installation step in your job script.
@@ -175,8 +178,8 @@ For illustrative purposes, we will instead create the environment interactively
 using `srun`.
 
 ```{note}
-Once an environment is created with the necessary dependencies properly
-installed, it can be reused without any additional installation by simply
+Once the necessary dependencies have been properly installed in an environment,
+it can be reused without any additional installation by simply
 activating it again.
 ```
 
@@ -195,18 +198,19 @@ $ srun --pty -t 00:30:00 --partition=gpu --gres=gpu:h100:1 -N 1 -n 1 /bin/bash -
 
 Notice the increased wall time (`-t 00:30:00`) - it's good to give yourself
 some leeway here in case the downloading/installation takes longer than expected.
+Once the interactive session on the compute node starts:
 
 ```bash
-$ source ~/venvs/mnist-example/bin/activate
-$ cd ~/repos/pytorch-examples/mnist
-$ pip install -r requirements.txt ipython
+$ source ~/venvs/mnist-example/bin/activate  # Enter the virtual environment
+$ cd ~/repos/pytorch-examples/mnist  # Go to the source repo where deps are specified
+$ pip install -r requirements.txt ipython  # Installed the deps (and ipython)
 ```
 
 Once this has completed, you can test the successful installation:
 
-```bash
-$ python
->>> import torch.nn as nn
+```
+$ ipython
+In [1]: import torch.nn as nn
 ```
 
 If the installation completed correctly, you shouldn't see any exceptions at
@@ -275,10 +279,10 @@ optional arguments:
 The most important options are the `--data-path` and `--model-save-path` flags,
 which determine where the training data and training output will be stored.
 As a general rule of thumb, you should never store data in your home directory.
-Your home directory on hpc is capped at 50GB by default, and is not intended
+Your home directory on HPC is capped at 50GB by default, and is not intended
 for storage/access of large data.
 **As a rule of thumb - your home directory should only be used for source code
-and environments**.
+and virtual environments**.
 For more details on storage allocations on HPC, including central storage and
 scratch space, see [the official documentation][hpc-storage].
 
@@ -294,18 +298,18 @@ partition (if you haven't already):
 $ mkdir -p /central/groups/<your-research-group-name>/<your-username>/mnist_example
 ```
 
-If your not sure what `<your-research-group-name>` is, try `ls /central/groups`
+If you're not sure what `<your-research-group-name>` is, try `ls /central/groups`
 and see if there are any obvious candidates (e.g. your professor's last name).
 Else ask the person from your group who gave you HPC access!
 
 Now we have everything we need to run the job.
 
-### Submitting the job
+## Submitting the job
 
 We'll use slurm's `sbatch` command to submit our job to the scheduler.
 To do so, we first need to write the script that describes our job.
-In our case, there are two main steps we need to include:
- 1. Enter the virtual environment, and
+We have two main steps
+ 1. Enter the virtual environment
  2. Run `main.py`
 
 Create a new bash script somehwere in your home directory called `train-mnist.sh`
@@ -332,6 +336,7 @@ python $SRCDIR/main.py \
 ```
 
 Be sure to replace `<your-research-group-name>` and `<your-username>`.
+
 `sbatch` should be smart enough to assume that whatever job script you pass it
 is executable, but it's always good to be explicit:
 
@@ -356,18 +361,18 @@ See [the official HPC docs](https://www.hpc.caltech.edu/documentation/slurm-comm
 for details.
 ```
 
-`sbatch` returns the `<job-id>` of the submitted job.
-The `<job-id>` can be used to look up the status of the job:
+`sbatch` returns the `<job-id>` of the submitted job, which can be used to look
+up the status of the job:
 
 ```bash
 $ scontrol show job <job-id>
 ```
 
-The status of the job (i.e. whether it's running, pending, has completed, or
-failed) can be found in the `JobState` field.
+The current status of the job (e.g. `PENDING`, `RUNNING`, `FAILED`, `COMPLETED`, etc.)
+is indicated in the `JobState` field.
 
 `stdout` and `stderr` for batch jobs are piped to text files `slurm-<job-id>.out`
-in your home directory.
+in your home directory (by default).
 You can monitor the output of your job with a file pager:
 
 ```bash
