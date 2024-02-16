@@ -1,4 +1,7 @@
+# For building the site
 sphinx
 myst-nb
 sphinx-book-theme
 sphinx-togglebutton
+# For deploying
+ghp-import
