@@ -12,4 +12,5 @@ hidden: true
 ---
 
 quickstart
+examples/index
 ```

@@ -1,0 +1,788 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Walkthrough: Training MNIST on HPC &#8212; Caltech HPC User Guides</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=5c82754e"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/mnist-walkthrough';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Examples" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Caltech HPC User Guides</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Walkthrough: Training MNIST on HPC</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/examples/mnist-walkthrough.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Walkthrough: Training MNIST on HPC</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logging-on-to-hpc">Logging on to HPC</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-gpu-access">Testing GPU access</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-training-job">Setting up a training job</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#downloading-the-example">Downloading the example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-virtual-environment">Setting up a virtual environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-dependencies">Installing dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-for-the-run">Preparing for the run</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submitting-the-job">Submitting the job</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-results">Checking the results</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="walkthrough-training-mnist-on-hpc">
+<h1>Walkthrough: Training MNIST on HPC<a class="headerlink" href="#walkthrough-training-mnist-on-hpc" title="Link to this heading">#</a></h1>
+<p>An end-to-end example of setting up and running a model training job with
+pytorch via <a class="reference external" href="https://www.hpc.caltech.edu/documentation/slurm-commands">slurm</a>.</p>
+<p>Specifically, this quickstart will show how to setup and run a job training
+a simple model on the ubiquitous <a class="reference external" href="https://en.wikipedia.org/wiki/MNIST_database">MNIST dataset</a> on one of HPC’s
+H100 nodes.</p>
+<div class="dropdown admonition">
+<p class="admonition-title">Before you begin…</p>
+<p>Make sure you have an account with HPC.
+See <a class="reference external" href="https://www.hpc.caltech.edu/documentation/account-information">the official documentation</a> for details.</p>
+</div>
+<section id="logging-on-to-hpc">
+<h2>Logging on to HPC<a class="headerlink" href="#logging-on-to-hpc" title="Link to this heading">#</a></h2>
+<p>First you must log in to the HPC cluster.
+Details are provided in the <a class="reference external" href="https://www.hpc.caltech.edu/documentation/faq/how-do-i-login-cluster">official documentation</a>, with one
+caveat: you must log in to <em>specific</em> login nodes in order to access the H100’s,
+either <strong>login3</strong> or <strong>login4</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ssh &lt;your-username&gt;@login3.hpc.caltech.edu
+</pre></div>
+</div>
+<p>Follow the instructions to complete the login with two-factor authentication.</p>
+<p>After successful login, you will be on the <em>login node</em> inside the home directory
+for your account:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[&lt;your-username&gt;@login3 ~]$ pwd
+/home/&lt;your-username&gt;
+</pre></div>
+</div>
+</section>
+<section id="testing-gpu-access">
+<h2>Testing GPU access<a class="headerlink" href="#testing-gpu-access" title="Link to this heading">#</a></h2>
+<p>The login node is not intended for computationally-intensive tasks, thus you will
+not have direct access to GPU resources there.
+To test GPU access, you’ll need to use one of the <em>compute nodes</em>.</p>
+<p>One way to do so is to log onto one of the compute nodes interactively using
+<code class="docutils literal notranslate"><span class="pre">srun</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ srun --pty -t 00:00:30 --partition=gpu --gres=gpu:h100:1 -N 1 -n 1 /bin/bash -l
+</pre></div>
+</div>
+<p>As soon as your job is allocated, you should notice a change in the hostname
+(the thing after the <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> in your bash prompt) indicating that you are now on
+a compute node, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[&lt;your-username&gt;@hpc-33-13 ~]$
+</pre></div>
+</div>
+<p>The compute node will have access to the gpu resources requested via the <code class="docutils literal notranslate"><span class="pre">--gres</span></code>
+flag — a single H100 card in this example.
+You can run familiar commands to query the state of the GPU from the terminal
+session on the compute node:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[&lt;your-username&gt;@hpc-33-13 ~]$ nvidia-smi
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.86.10              Driver Version: 535.86.10    CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA H100 80GB HBM3          On  | 00000000:E3:00.0 Off |                    0 |
+| N/A   24C    P0              67W / 700W |      4MiB / 81559MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+</pre></div>
+</div>
+<p>Type <code class="docutils literal notranslate"><span class="pre">exit</span></code> to exit the interactive terminal session on the compute node.
+Notice that the hostname reverts back to <code class="docutils literal notranslate"><span class="pre">login3</span></code>, reflecting that you are
+back on the login node.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>&lt;your-username&gt;@hpc-33-13<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span><span class="nb">exit</span>
+<span class="nb">logout</span>
+<span class="o">[</span>&lt;your-username&gt;@login3<span class="w"> </span>~<span class="o">]</span>$
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-training-job">
+<h2>Setting up a training job<a class="headerlink" href="#setting-up-a-training-job" title="Link to this heading">#</a></h2>
+<p>The ability to start interactive sessions on compute nodes via <code class="docutils literal notranslate"><span class="pre">srun</span></code> is a handy,
+but it is not ideal for launching jobs.
+Batch processing is a much better fit for real computational experiments - the
+remainder of the quickstart shows how to setup, launch, and evaluate a model
+training job with slurm.</p>
+<section id="downloading-the-example">
+<h3>Downloading the example<a class="headerlink" href="#downloading-the-example" title="Link to this heading">#</a></h3>
+<p>We’ll use the <code class="docutils literal notranslate"><span class="pre">mnist</span></code> example from a fork of the <a class="reference external" href="https://github.com/pytorch/examples"><code class="docutils literal notranslate"><span class="pre">pytorch/examples</span></code></a>
+for this demo.</p>
+<p>The reason we’re using a forked version is to better illustrate
+best-practices when working on shared HPC systems: ensuring that data and other
+components that require a lot of storage (e.g. saved models) are kept separate
+from source code.</p>
+<p>The original pytorch mnist example has hard-coded paths for saving data to the
+source directory. We’ve <a class="reference external" href="https://github.com/pytorch/examples/compare/main...rossbar:pytorch-examples:add-path-flags">modified the example</a> to add additional
+user flags to the run script allowing us to specify separate locations for
+storing data and training outputs.</p>
+<p>Begin by downloading the source code (if you haven’t already):</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Be sure you’re on the login node for this part!</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mkdir<span class="w"> </span>repos<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$_</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rossbar/pytorch-examples.git
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-virtual-environment">
+<h3>Setting up a virtual environment<a class="headerlink" href="#setting-up-a-virtual-environment" title="Link to this heading">#</a></h3>
+<p>For this workflow, we’ll use the Python built-in <code class="docutils literal notranslate"><span class="pre">venv</span></code> module to manage
+environments.</p>
+<p>First we’ll create a centralized location to keep our virtual environments:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/venvs
+</pre></div>
+</div>
+<p>Then create the environment for this specific experiment. We’ll call it
+<code class="docutils literal notranslate"><span class="pre">mnist-example</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/venvs/mnist-example
+</pre></div>
+</div>
+<p>Enter the environment you’ve just created.
+It should be empty, give-or-take libraries for packaging such as <code class="docutils literal notranslate"><span class="pre">pip</span></code>,
+<code class="docutils literal notranslate"><span class="pre">setuptools</span></code> and/or <code class="docutils literal notranslate"><span class="pre">wheel</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/venvs/mnist-example/bin/activate
+$<span class="w"> </span>pip<span class="w"> </span>list
+Package<span class="w">    </span>Version
+----------<span class="w"> </span>-------
+pip<span class="w">        </span><span class="m">21</span>.2.3
+setuptools<span class="w"> </span><span class="m">53</span>.0.0
+</pre></div>
+</div>
+</section>
+<section id="installing-dependencies">
+<h3>Installing dependencies<a class="headerlink" href="#installing-dependencies" title="Link to this heading">#</a></h3>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This step requires careful attention when using libraries that interface with
+GPUs, such as <code class="docutils literal notranslate"><span class="pre">pytorch</span></code>.</p>
+</div>
+<p>In order to fully support the hardware, GPUs <em>must</em> be discoverable at
+installation time, i.e. when you run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>.</p>
+<p><strong>This means that you must install dependencies with device support (like <code class="docutils literal notranslate"><span class="pre">pytorch</span></code>)
+on the compute nodes with allocated GPU(s).</strong></p>
+<p>There are multiple ways you can do so: one option is to include the dependency
+installation step in your job script.
+For illustrative purposes, we will instead create the environment interactively
+using <code class="docutils literal notranslate"><span class="pre">srun</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once the necessary dependencies have been properly installed in an environment,
+it can be reused without any additional installation by simply
+activating it again.</p>
+</div>
+<p>For clarity’s sake, exit the <code class="docutils literal notranslate"><span class="pre">mnist-example</span></code> environment on the login node:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>deactivate
+</pre></div>
+</div>
+<p>Now, request an interactive terminal on a compute node with at least one GPU
+allocated:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>srun<span class="w"> </span>--pty<span class="w"> </span>-t<span class="w"> </span><span class="m">00</span>:30:00<span class="w"> </span>--partition<span class="o">=</span>gpu<span class="w"> </span>--gres<span class="o">=</span>gpu:h100:1<span class="w"> </span>-N<span class="w"> </span><span class="m">1</span><span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>/bin/bash<span class="w"> </span>-l
+</pre></div>
+</div>
+<p>Notice the increased wall time (<code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">00:30:00</span></code>) - it’s good to give yourself
+some leeway here in case the downloading/installation takes longer than expected.
+Once the interactive session on the compute node starts:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/venvs/mnist-example/bin/activate<span class="w">  </span><span class="c1"># Enter the virtual environment</span>
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/repos/pytorch-examples/mnist<span class="w">  </span><span class="c1"># Go to the source repo where deps are specified</span>
+$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>ipython<span class="w">  </span><span class="c1"># Installed the deps (and ipython)</span>
+</pre></div>
+</div>
+<p>Once this has completed, you can test the successful installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ipython
+In [1]: import torch.nn as nn
+</pre></div>
+</div>
+<p>If the installation completed correctly, you shouldn’t see any exceptions at
+import time.
+If you get an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> or <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code>, it means something went
+wrong while installing pytorch.
+Consider opening an issue to this repo!</p>
+<p>Once the installation is complete, you can close your interactive session on
+the compute node with <code class="docutils literal notranslate"><span class="pre">exit</span></code>.</p>
+</section>
+<section id="preparing-for-the-run">
+<h3>Preparing for the run<a class="headerlink" href="#preparing-for-the-run" title="Link to this heading">#</a></h3>
+<p>Now that the virtual environment is set up with all the packages need to run
+our job, the focus shifts to making final preparations for the run.
+In this case, this means ensuring that we have the dataset that we’ll be
+training on, and that all of the paths for loading/saving data have been
+set up.</p>
+<p>First, ensure you’re on the login node, and activate the virtual environment</p>
+<div class="dropdown admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember, once the environment is successfully created on the compute node,
+it can be entered from anywhere (though GPU-specific features will only work
+on nodes with GPU resources allocated to them!)</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/venvs/mnist-example/bin-activate
+</pre></div>
+</div>
+<p>The mnist example provides a command-line interface using <code class="docutils literal notranslate"><span class="pre">argparse</span></code>, therefore
+we can learn about the options by passing in the <code class="docutils literal notranslate"><span class="pre">--help</span></code> flag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd repos/pytorch-examples/mnist
+$ python main.py --help
+usage: main.py [-h] [--data-path DATA_PATH] [--batch-size N] [--test-batch-size N]
+               [--epochs N] [--lr LR] [--gamma M] [--no-cuda] [--no-mps] [--dry-run]
+               [--seed S] [--log-interval N] [--save-model]
+               [--model-save-path MODEL_SAVE_PATH]
+
+PyTorch MNIST Example
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --data-path DATA_PATH
+                        path to MNIST data (default: &quot;../data&quot;)
+  --batch-size N        input batch size for training (default: 64)
+  --test-batch-size N   input batch size for testing (default: 1000)
+  --epochs N            number of epochs to train (default: 14)
+  --lr LR               learning rate (default: 1.0)
+  --gamma M             Learning rate step gamma (default: 0.7)
+  --no-cuda             disables CUDA training
+  --no-mps              disables macOS GPU training
+  --dry-run             quickly check a single pass
+  --seed S              random seed (default: 1)
+  --log-interval N      how many batches to wait before logging training status
+  --save-model          For Saving the current Model
+  --model-save-path MODEL_SAVE_PATH
+                        path to which model will be saved (default: cwd)
+</pre></div>
+</div>
+<p>The most important options are the <code class="docutils literal notranslate"><span class="pre">--data-path</span></code> and <code class="docutils literal notranslate"><span class="pre">--model-save-path</span></code> flags,
+which determine where the training data and training output will be stored.
+As a general rule of thumb, you should never store data in your home directory.
+Your home directory on HPC is capped at 50GB by default, and is not intended
+for storage/access of large data.
+<strong>As a rule of thumb - your home directory should only be used for source code
+and virtual environments</strong>.
+For more details on storage allocations on HPC, including central storage and
+scratch space, see <a class="reference external" href="https://www.hpc.caltech.edu/documentation/storage">the official documentation</a>.</p>
+<p>For this simple example, the downloading of the training data is handled for
+us by <code class="docutils literal notranslate"><span class="pre">torchvision.datasets</span></code>, so all we have to do is create a directory where
+data will be stored.
+Since the MNIST dataset is so small (~60MB) we don’t have to worry about
+storage utilization.
+Go ahead and create a directory on your research group’s central storage
+partition (if you haven’t already):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/central/groups/&lt;your-research-group-name&gt;/&lt;your-username&gt;/mnist_example
+</pre></div>
+</div>
+<p>If you’re not sure what <code class="docutils literal notranslate"><span class="pre">&lt;your-research-group-name&gt;</span></code> is, try <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">/central/groups</span></code>
+and see if there are any obvious candidates (e.g. your professor’s last name).
+Else ask the person from your group who gave you HPC access!</p>
+<p>Now we have everything we need to run the job.</p>
+</section>
+</section>
+<section id="submitting-the-job">
+<h2>Submitting the job<a class="headerlink" href="#submitting-the-job" title="Link to this heading">#</a></h2>
+<p>We’ll use slurm’s <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> command to submit our job to the scheduler.
+To do so, we first need to write the script that describes our job.
+We have two main steps</p>
+<ol class="arabic simple">
+<li><p>Enter the virtual environment</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p></li>
+</ol>
+<p>Create a new bash script somehwere in your home directory called <code class="docutils literal notranslate"><span class="pre">train-mnist.sh</span></code>
+and paste the following into it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#! /bin/bash</span>
+
+<span class="nv">VENV</span><span class="o">=</span><span class="nv">$HOME</span>/venvs/mnist-example
+<span class="nv">SRCDIR</span><span class="o">=</span><span class="nv">$HOME</span>/repos/pytorch-examples/mnist
+<span class="nv">EXPERIMENT_DIR</span><span class="o">=</span>/central/groups/&lt;your-research-group-name&gt;/&lt;your-username&gt;/mnist_example
+
+<span class="c1"># Activate Python virtual environment</span>
+<span class="nb">source</span><span class="w"> </span><span class="nv">$VENV</span>/bin/activate
+
+<span class="c1"># Sanity check: list out Python packages in current environment</span>
+pip<span class="w"> </span>list
+
+<span class="c1"># Run the job</span>
+python<span class="w"> </span><span class="nv">$SRCDIR</span>/main.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-path<span class="w"> </span><span class="nv">$EXPERIMENT_DIR</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--save-model<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model-save-path<span class="w"> </span><span class="nv">$EXPERIMENT_DIR</span>/model
+</pre></div>
+</div>
+<p>Be sure to replace <code class="docutils literal notranslate"><span class="pre">&lt;your-research-group-name&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;your-username&gt;</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sbatch</span></code> should be smart enough to assume that whatever job script you pass it
+is executable, but it’s always good to be explicit:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod<span class="w"> </span>u+x<span class="w"> </span>train-mnist.sh
+</pre></div>
+</div>
+<p>Now we’re ready to submit the job.
+This is a very small experiment, so we only set the wall time to 10 minutes and only
+request a single GPU.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>sbatch<span class="w"> </span>-t<span class="w"> </span><span class="m">00</span>:10:00<span class="w"> </span>--partition<span class="o">=</span>gpu<span class="w"> </span>--gres<span class="o">=</span>gpu:h100:1<span class="w"> </span>-N<span class="w"> </span><span class="m">1</span><span class="w"> </span>-n<span class="w"> </span><span class="m">8</span><span class="w"> </span>train-mnist.sh
+Submitted<span class="w"> </span>batch<span class="w"> </span>job<span class="w"> </span>&lt;job-id&gt;
+</pre></div>
+</div>
+<div class="dropdown admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> options can be included in the job script directly with <code class="docutils literal notranslate"><span class="pre">#SBATCH</span></code>.
+See <a class="reference external" href="https://www.hpc.caltech.edu/documentation/slurm-commands">the official HPC docs</a>
+for details.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">sbatch</span></code> returns the <code class="docutils literal notranslate"><span class="pre">&lt;job-id&gt;</span></code> of the submitted job, which can be used to look
+up the status of the job:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>scontrol<span class="w"> </span>show<span class="w"> </span>job<span class="w"> </span>&lt;job-id&gt;
+</pre></div>
+</div>
+<p>The current status of the job (e.g. <code class="docutils literal notranslate"><span class="pre">PENDING</span></code>, <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code>, <code class="docutils literal notranslate"><span class="pre">FAILED</span></code>, <code class="docutils literal notranslate"><span class="pre">COMPLETED</span></code>, etc.)
+is indicated in the <code class="docutils literal notranslate"><span class="pre">JobState</span></code> field.</p>
+<p><code class="docutils literal notranslate"><span class="pre">stdout</span></code> and <code class="docutils literal notranslate"><span class="pre">stderr</span></code> for batch jobs are piped to text files <code class="docutils literal notranslate"><span class="pre">slurm-&lt;job-id&gt;.out</span></code>
+in your home directory (by default).
+You can monitor the output of your job with a file pager:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>less<span class="w"> </span>slurm-&lt;job-id&gt;.out
+</pre></div>
+</div>
+<section id="checking-the-results">
+<h3>Checking the results<a class="headerlink" href="#checking-the-results" title="Link to this heading">#</a></h3>
+<p>Assuming the job completed successfully<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, there should be a model saved to
+the path specified by <code class="docutils literal notranslate"><span class="pre">--model-save-dir</span></code>.
+We can verify this from the login node:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/venvs/mnist-example/bin/activate
+$<span class="w"> </span>ipython
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">model_path</span> <span class="o">=</span> <span class="s2">&quot;/central/groups/&lt;your-research-group-name&gt;/&lt;your-username&gt;/mnist_example/model/mnist_cnn.pt&quot;</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">))</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">model</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">odict_keys</span><span class="p">([</span><span class="s1">&#39;conv1.weight&#39;</span><span class="p">,</span> <span class="s1">&#39;conv1.bias&#39;</span><span class="p">,</span> <span class="s1">&#39;conv2.weight&#39;</span><span class="p">,</span> <span class="s1">&#39;conv2.bias&#39;</span><span class="p">,</span> <span class="s1">&#39;fc1.weight&#39;</span><span class="p">,</span> <span class="s1">&#39;fc1.bias&#39;</span><span class="p">,</span> <span class="s1">&#39;fc2.weight&#39;</span><span class="p">,</span> <span class="s1">&#39;fc2.bias&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Of course, if you actually wanted to <em>use</em> the model for inference, you’d want
+to set up another slurm job and run it on the compute nodes!</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>It should have! If it didn’t, see what went wrong in the <code class="docutils literal notranslate"><span class="pre">slurm-&lt;job-id&gt;.out</span></code>
+log. If it was a problem with the tutorial, open an issue/PR!</p>
+</aside>
+</aside>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Examples</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logging-on-to-hpc">Logging on to HPC</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-gpu-access">Testing GPU access</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-training-job">Setting up a training job</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#downloading-the-example">Downloading the example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-up-a-virtual-environment">Setting up a virtual environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-dependencies">Installing dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-for-the-run">Preparing for the run</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submitting-the-job">Submitting the job</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-results">Checking the results</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By rossbar
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, rossbar.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
