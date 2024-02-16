@@ -17,6 +17,7 @@ release = '2024.02.15-dev'
 extensions = [
     "myst_nb",
     "sphinx_togglebutton",
+    "sphinx_design",
 ]
 
 templates_path = ['_templates']

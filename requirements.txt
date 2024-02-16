@@ -3,5 +3,6 @@ sphinx
 myst-nb
 sphinx-book-theme
 sphinx-togglebutton
+sphinx-design
 # For deploying
 ghp-import
