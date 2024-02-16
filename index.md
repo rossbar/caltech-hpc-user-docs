@@ -12,4 +12,5 @@ hidden: true
 ---
 
 quickstart
+mnist-walkthrough
 ```
