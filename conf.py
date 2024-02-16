@@ -31,3 +31,11 @@ exclude_patterns = [
 html_theme = 'sphinx_book_theme'
 html_title = "Caltech HPC User Guides"
 #html_static_path = ['_static']
+html_theme_options = {
+    "github_url": "https://github.com/rossbar/caltech-hpc-user-docs",
+    "repository_url": "https://github.com/rossbar/caltech-hpc-user-docs",
+    "repository_branch": "main",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+}
