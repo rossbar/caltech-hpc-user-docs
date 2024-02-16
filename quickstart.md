@@ -1,7 +1,7 @@
 # Quickstart
 
 Training MNIST on Caltech HPC H100 nodes.
-See {doc}`the full walkthrough <mnist-walkthrough>` for more detailed explanations.
+See {doc}`the full walkthrough <examples/mnist-walkthrough>` for more detailed explanations.
 
 ## 1. Login to HPC
 
@@ -27,7 +27,7 @@ python3 -m venv ~/venvs/mnist-example
 
 ```{note}
 Pytorch must be installed on a compute node with GPU resources allocated.
-See {doc}`the full walkthrough <mnist-walkthrough>` for details.
+See {doc}`the full walkthrough <examples/mnist-walkthrough>` for details.
 ```
 
 ```bash

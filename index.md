@@ -12,5 +12,5 @@ hidden: true
 ---
 
 quickstart
-mnist-walkthrough
+examples/index
 ```
