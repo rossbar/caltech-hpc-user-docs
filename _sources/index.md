@@ -13,4 +13,5 @@ hidden: true
 
 quickstart
 examples/index
+how-to/index
 ```
