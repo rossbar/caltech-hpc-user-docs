@@ -35,6 +35,14 @@ You can see all the available Python versions with:
 $ module avail | grep "python/3\."
 ```
 
+````{note}
+You can ensure that the desired Python version is loaded by default by adding
+the `module load` command to your `.bashrc`. For example, if you want to have
+Python 3.11 available at login: `echo "module load python/3.11" >> .bashrc`.
+
+This will save you from having to `module load` each time you log into HPC.
+````
+
 ## 3. Download example code
 
 ```bash
