@@ -9,21 +9,55 @@ See {doc}`the full walkthrough <examples/mnist-walkthrough>` for more detailed e
 ssh <your-username>@login3.hpc.caltech.edu
 ```
 
-## 2. Download example code
+## 2. Check the Python version
+
+It is advisable to check the Python version that is loaded by default on login:
+
+```
+$ python --version
+Python 3.9.18
+```
+
+If you are using codebases that depend on the latest version of deep learning
+frameworks (`pytorch`, `jax`, etc.), chances are you will need to update to a
+more modern Python version.
+You can do so via HPC's module system, e.g.
+
+```bash
+$ module load python/3.10
+$ python --version  # check loading worked as expected
+Python 3.10.12
+```
+
+You can see all the available Python versions with:
+
+```bash
+$ module avail | grep "python/3\."
+```
+
+````{note}
+You can ensure that the desired Python version is loaded by default by adding
+the `module load` command to your `.bashrc`. For example, if you want to have
+Python 3.11 available at login: `echo "module load python/3.11" >> .bashrc`.
+
+This will save you from having to `module load` each time you log into HPC.
+````
+
+## 3. Download example code
 
 ```bash
 mkdir repos && cd $_
 git clone https://github.com/rossbar/pytorch-examples.git
 ```
 
-## 3. Create virtual environment
+## 4. Create virtual environment
 
 ```bash
 mkdir -p ~/venvs
 python3 -m venv ~/venvs/mnist-example
 ```
 
-## 4. Install dependencies
+## 5. Install dependencies
 
 ```{note}
 Pytorch must be installed on a compute node with GPU resources allocated.
@@ -46,13 +80,13 @@ python -c "import torch.nn as nn"
 exit
 ```
 
-## 5. Set up paths
+## 6. Set up paths
 
 ```bash
 mkdir -p /central/groups/<your-research-group-name>/<your-username>/mnist_example
 ```
 
-## 6. Prepare job script
+## 7. Prepare job script
 
 Copy the following into a file called `train-mnist.sh`
 
@@ -76,14 +110,14 @@ python $SRCDIR/main.py \
   --model-save-path $EXPERIMENT_DIR/model
 ```
 
-## 7. Submit the job
+## 8. Submit the job
 
 ```bash
 chmod u+x train-mnist.sh
 sbatch -t 00:10:00 --partition=gpu --gres=gpu:h100:1 -N 1 -n 8 train-mnist.sh
 ```
 
-## 8. Monitor the job
+## 9. Monitor the job
 
 Use `scontrol show job <job-id>` to poll the current status of the job.
 The output (i.e. `stdout` and `stderr`) are piped to a file in your home
@@ -91,7 +125,7 @@ directory called `slurm-<job-id>.out`.
 You can safely monitor this file as well using a read-only pager such as `less`,
 even while the job is still running.
 
-## 9. Check the results
+## 10. Check the results
 
 Once the job is complete, you can verify that the trained model is at the
 location specified in the job script:
